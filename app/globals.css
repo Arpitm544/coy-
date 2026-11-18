@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+:root {
+  --background: #fbf8f5;
+  --foreground: #27252b;
+  --coy-brand: #5d395b;
+  --coy-subtext: #8e8990;
+  --coy-border: #e9e2df;
+}
+
+body {
+  background-color: #fbf8f5;
+  color: #27252b;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent unwanted pull-to-refresh on mobile swipe */
+html, body {
+  overscroll-behavior-y: none;
+}
