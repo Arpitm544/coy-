@@ -11,6 +11,10 @@ export default function CoyApp() {
   const [matchedProfile, setMatchedProfile] = useState<Profile | null>(null);
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
 
+  // Simple drag state (drag right = like, drag left = pass)
+  const [dragX, setDragX] = useState<number>(0);
+  const [startX, setStartX] = useState<number | null>(null);
+
   // 1. Fetch data from APIs
   const loadData = async () => {
     const [feedRes, matchRes] = await Promise.all([
@@ -32,6 +36,8 @@ export default function CoyApp() {
 
     // Remove top card immediately
     setProfiles((prev) => prev.slice(1));
+    setDragX(0);
+    setStartX(null);
 
     const res = await fetch('/api/swipe', {
       method: 'POST',
@@ -40,7 +46,7 @@ export default function CoyApp() {
     });
     const data = await res.json();
 
-    // Mutual match -> show popup & add to matches
+    // Mutual match -> show celebration & add to matches
     if (data.success && data.match && data.matchedProfile) {
       setMatchedProfile(data.matchedProfile);
       setMatches((prev) => [
@@ -50,11 +56,23 @@ export default function CoyApp() {
     }
   };
 
+  // 3. Drag Gesture logic (touch + mouse)
+  const onTouchStart = (clientX: number) => setStartX(clientX);
+  const onTouchMove = (clientX: number) => {
+    if (startX !== null) setDragX(clientX - startX);
+  };
+  const onTouchEnd = () => {
+    if (dragX > 70) handleSwipe('like');
+    else if (dragX < -70) handleSwipe('pass');
+    setDragX(0);
+    setStartX(null);
+  };
+
   const currentProfile = profiles[0];
 
   return (
     <main className="min-h-screen bg-[#f3eeea] flex items-center justify-center sm:p-4">
-      {/* Mobile container */}
+      {/* Mobile container matching Figma dimensions */}
       <div className="w-full sm:max-w-[390px] h-screen sm:h-[844px] bg-[#fbf8f5] sm:rounded-[36px] sm:shadow-lg sm:border sm:border-[#e9e2df] flex flex-col justify-between overflow-hidden relative select-none">
         
         {/* ==================== 1. HOME TAB ==================== */}
@@ -89,10 +107,25 @@ export default function CoyApp() {
               </p>
             </div>
 
-            {/* Profile Card or Empty state */}
+            {/* Profile Card with Drag Gestures (Mobile + Mouse) */}
             {currentProfile ? (
               <div className="my-auto py-2">
-                <ProfileCard profile={currentProfile} />
+                <div
+                  onMouseDown={(e) => onTouchStart(e.clientX)}
+                  onMouseMove={(e) => onTouchMove(e.clientX)}
+                  onMouseUp={onTouchEnd}
+                  onMouseLeave={onTouchEnd}
+                  onTouchStart={(e) => onTouchStart(e.touches[0].clientX)}
+                  onTouchMove={(e) => onTouchMove(e.touches[0].clientX)}
+                  onTouchEnd={onTouchEnd}
+                  style={{
+                    transform: `translateX(${dragX}px) rotate(${dragX * 0.05}deg)`,
+                    transition: startX !== null ? 'none' : 'transform 0.2s ease',
+                  }}
+                  className="cursor-grab active:cursor-grabbing relative"
+                >
+                  <ProfileCard profile={currentProfile} dragX={dragX} />
+                </div>
               </div>
             ) : (
               <div className="my-auto flex flex-col items-center text-center py-6">
@@ -116,7 +149,7 @@ export default function CoyApp() {
               </div>
             )}
 
-            {/* Buttons: Pass & Like */}
+            {/* Buttons: Pass (×) & Like (♥) on Desktop */}
             {currentProfile && (
               <div className="flex items-center justify-center gap-10 py-1">
                 <button
@@ -152,7 +185,7 @@ export default function CoyApp() {
                 <div className="h-64 flex flex-col items-center justify-center text-center">
                   <p className="text-[15px] font-semibold text-[#27252b]">No mutual matches yet</p>
                   <p className="text-[12px] text-[#8e8990] mt-1">
-                    Like profiles on Discover to match.
+                    Swipe right on Discover to match.
                   </p>
                   <button
                     type="button"
@@ -234,7 +267,7 @@ export default function CoyApp() {
           </button>
         </nav>
 
-        {/* ==================== 4. MUTUAL MATCH CELEBRATION ==================== */}
+        {/* ==================== 4. MUTUAL MATCH POPUP ==================== */}
         {matchedProfile && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
             <div className="w-full max-w-[320px] bg-[#fbf8f5] rounded-[24px] shadow-2xl p-6 flex flex-col items-center text-center">
@@ -288,8 +321,8 @@ export default function CoyApp() {
   );
 }
 
-// Simple Reusable Profile Card (Used by both Discover & Matches Detail!)
-function ProfileCard({ profile }: { profile: Profile }) {
+// Simple Reusable Profile Card with LIKE / PASS drag badges
+function ProfileCard({ profile, dragX = 0 }: { profile: Profile; dragX?: number }) {
   return (
     <div className="w-full bg-white border border-[#e9e2df] rounded-[24px] overflow-hidden shadow-sm flex flex-col select-none">
       <div className="relative w-full h-[260px] bg-[#e8e5e3]">
@@ -297,10 +330,21 @@ function ProfileCard({ profile }: { profile: Profile }) {
           src={profile.photo}
           alt={profile.name}
           fill
-          className="object-cover"
+          className="object-cover pointer-events-none"
           sizes="342px"
           priority
         />
+        {/* Swipe Feedback Badges */}
+        {dragX > 30 && (
+          <div className="absolute top-4 left-4 bg-emerald-500 text-white font-bold text-xs px-3 py-1 rounded-full shadow">
+            LIKE
+          </div>
+        )}
+        {dragX < -30 && (
+          <div className="absolute top-4 right-4 bg-rose-500 text-white font-bold text-xs px-3 py-1 rounded-full shadow">
+            PASS
+          </div>
+        )}
       </div>
       <div className="p-4 flex flex-col justify-between">
         <div>
