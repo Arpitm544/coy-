@@ -37,10 +37,11 @@ The comprehensive live app teardown and feature suggestions are documented in:
 ### 📱 Demo Video
 Watch the mobile walk-through of the Discover tab, card dragging, mutual matching celebration, matches list, and profile detail view:
 
-[![Watch Part B Demo Video](./demo/coy-discover-thumbnail.png)](./demo/coy-discover-demo.mp4)
 
-* 🎥 **[▶ Click here to view / play the Demo Video (MP4)](./demo/coy-discover-demo.mp4)**
-* 📦 *Original Apple QuickTime recording also available at [`demo/coy-discover-demo.mov`](./demo/coy-discover-demo.mov)*
+
+https://github.com/user-attachments/assets/6f5d24e2-71d8-4c76-89bc-dceff33f9ca4
+
+
 
 ### Key Features
 1. **Swipe Experience (Mobile Drag + Desktop Buttons):**
