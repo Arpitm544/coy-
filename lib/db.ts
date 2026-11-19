@@ -441,7 +441,7 @@ export function getMatches() {
     .sort((a, b) => b.matchedAt - a.matchedAt);
 }
 
-// Reset for reviewer demo
+// Restore the initial feed and clear swipe history.
 export function resetDb() {
   saveDb({ profiles: SEED_PROFILES, swipes: [], matches: [] });
 }
